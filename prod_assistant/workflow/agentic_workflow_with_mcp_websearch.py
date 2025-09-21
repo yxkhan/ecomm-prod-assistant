@@ -123,21 +123,32 @@ class AgenticRAG:
         workflow.add_edge(START, "Assistant")
         workflow.add_conditional_edges(
             "Assistant",
+            
+            
             lambda state: "Retriever" if "TOOL" in state["messages"][-1].content else END,
-            {"Retriever": "Retriever", END: END},
+            
+            {
+                "Retriever": "Retriever", 
+                 END: END
+             },
         )
         workflow.add_conditional_edges(
+            
             "Retriever",
+            
             self._grade_documents,
-            {"generator": "Generator", "rewriter": "Rewriter"},
+            
+            {"generator": "Generator", 
+             
+             "rewriter": "Rewriter"},
         )
         workflow.add_edge("Generator", END)
 
         # New path: Rewriter → WebSearch → END
         workflow.add_edge("Rewriter", "WebSearch")
+        
         workflow.add_edge("WebSearch", "Assistant")
-        workflow.add_edge("Assistant", END)
-
+        
         return workflow
 
     # ---------- Public Run ----------
