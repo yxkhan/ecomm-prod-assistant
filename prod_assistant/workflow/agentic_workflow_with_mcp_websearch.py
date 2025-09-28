@@ -19,6 +19,9 @@ class AgenticRAG:
 
     class AgentState(TypedDict):
         messages: Annotated[Sequence[BaseMessage], add_messages]
+        
+    async def async_init(self):
+        self.mcp_tools = await self.mcp_client.get_tools()
 
     def __init__(self):
         self.retriever_obj = Retriever()
@@ -27,16 +30,14 @@ class AgenticRAG:
         self.checkpointer = MemorySaver()
 
         # MCP Client Init
-        self.mcp_client = MultiServerMCPClient({
+        self.mcp_client = MultiServerMCPClient(
+            {
             "hybrid_search": {
-                "command": "python",
-                "args": ["prod_assistant/mcp_servers/product_search_server.py"],  # server with retriever+websearch
-                "transport": "stdio"
-            }
-        })
-        # Load MCP tools
-        self.mcp_tools = asyncio.run(self.mcp_client.get_tools())
-
+            "transport": "streamable_http",
+            "url": "http://localhost:8000/mcp"
+        }
+        }
+        )
         self.workflow = self._build_workflow()
         self.app = self.workflow.compile(checkpointer=self.checkpointer)
 
@@ -56,11 +57,11 @@ class AgenticRAG:
             response = chain.invoke({"question": last_message})
             return {"messages": [HumanMessage(content=response)]}
 
-    def _vector_retriever(self, state: AgentState):
+    async def _vector_retriever(self, state: AgentState):
         print("--- RETRIEVER (MCP) ---")
         query = state["messages"][-1].content
         tool = next(t for t in self.mcp_tools if t.name == "get_product_info")
-        result = asyncio.run(tool.ainvoke({"query": query}))
+        result= await tool.ainvoke({"query": query})
         context = result if result else "No data"
         return {"messages": [HumanMessage(content=context)]}
 
