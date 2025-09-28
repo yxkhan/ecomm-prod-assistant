@@ -61,8 +61,8 @@ jobs:
           aws --version
     
       # Update kubeconfig
-      - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+      - name: Update kubeconfig with debug
+        run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }} --debug
 
       # Create/Update Kubernetes Secret (for API keys)
       - name: Create Kubernetes secret for API keys
