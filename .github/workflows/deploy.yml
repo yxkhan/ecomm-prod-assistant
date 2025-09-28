@@ -60,10 +60,27 @@ jobs:
           sudo ./aws/install --update
           aws --version
     
+      - name: Print Env Vars
+        run: |
+          echo "Region: ${{ secrets.AWS_REGION }}"
+          echo "Cluster: ${{ secrets.EKS_CLUSTER_NAME }}"
+
+      # Debug: Print AWS default region
+      - name: Print AWS region
+        run: |
+          echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION"
+          echo "AWS_REGION=$AWS_REGION"    
+      
       # Update kubeconfig
       - name: Update kubeconfig with debug
         run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }} --debug
 
+      # Debug: Show kubeconfig file
+      - name: Show kubeconfig
+        run: |
+          ls -la ~/.kube || true
+          cat ~/.kube/config || true
+      
       # Create/Update Kubernetes Secret (for API keys)
       - name: Create Kubernetes secret for API keys
         run: |
