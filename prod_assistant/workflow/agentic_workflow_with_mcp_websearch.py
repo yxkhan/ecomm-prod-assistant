@@ -88,25 +88,14 @@ class AgenticRAG:
 
         return {"messages": [HumanMessage(content=context)]}
 
-    def _web_search(self, state: AgentState):
+    async def _web_search(self, state: AgentState):
         print("--- WEB SEARCH (MCP) ---")
         query = state["messages"][-1].content
-
-        tool = next((t for t in self.mcp_tools if t.name == "web_search"), None)
-        if not tool:
-            return {"messages": [HumanMessage(content="Web search tool not found in MCP client.")]}
-
-        try:
-            # Handle event loop conflicts
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            result = loop.run_until_complete(tool.ainvoke({"query": query}))
-            loop.close()
-            context = result or "No web data found."
-        except Exception as e:
-            context = f"Error invoking web search: {e}"
-
+        tool = next(t for t in self.mcp_tools if t.name == "web_search")
+        result = await tool.ainvoke({"query": query})  # ✅
+        context = result if result else "No data from web"
         return {"messages": [HumanMessage(content=context)]}
+
 
     def _grade_documents(self, state: AgentState) -> Literal["generator", "rewriter"]:
         print("--- GRADER ---")
@@ -184,17 +173,13 @@ class AgenticRAG:
         return workflow
 
     # ---------- Public Run ----------
-    def run(self, query: str, thread_id: str = "default_thread") -> str:
+    async def run(self, query: str, thread_id: str = "default_thread") -> str:
         """Run the workflow for a given query and return the final answer."""
-        try:
-            result = self.app.invoke(
-                {"messages": [HumanMessage(content=query)]},
-                config={"configurable": {"thread_id": thread_id}},
-            )
-            return result["messages"][-1].content
-        except Exception as e:
-            print(f"Error during RAG run: {e}")
-            return f"Error: {e}"
+        result = await self.app.ainvoke(
+            {"messages": [HumanMessage(content=query)]},
+            config={"configurable": {"thread_id": thread_id}}
+        )
+        return result["messages"][-1].content
 
 # ---------- Standalone Test ----------
 if __name__ == "__main__":
