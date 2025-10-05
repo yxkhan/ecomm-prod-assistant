@@ -1,12 +1,12 @@
-import csv
-import time
+import csv   #To store the data in the form of csv
+import time  #to add the delay
 import re
 import os
-from bs4 import BeautifulSoup
-import undetected_chromedriver as uc
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
+from bs4 import BeautifulSoup  #To parse the HTML content
+import undetected_chromedriver as uc  #To avoid detection by the website/chrome as bot
+from selenium.webdriver.common.by import By  #To locate elements on the webpage
+from selenium.webdriver.common.keys import Keys  #To simulate keyboard key presses
+from selenium.webdriver.common.action_chains import ActionChains #to perform a series of actions
 
 class FlipkartScraper:
     def __init__(self, output_dir="data"):
@@ -14,7 +14,7 @@ class FlipkartScraper:
         os.makedirs(self.output_dir, exist_ok=True)
 
     def get_top_reviews(self,product_url,count=2):
-        """Get the top reviews for a product.
+        """Get the top reviews for a product. using undetected_chromedriver
         """
         options = uc.ChromeOptions()
         options.add_argument("--no-sandbox")

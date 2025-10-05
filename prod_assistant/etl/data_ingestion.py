@@ -1,3 +1,4 @@
+
 import os
 import pandas as pd
 from dotenv import load_dotenv
@@ -69,6 +70,7 @@ class DataIngestion:
     def transform_data(self):
         """
         Transform product data into list of LangChain Document objects.
+        creating custom document object to store in VDB
         """
         product_list = []
 
@@ -118,6 +120,7 @@ class DataIngestion:
     def run_pipeline(self):
         """
         Run the full data ingestion pipeline: transform data and store into vector DB.
+        Master method
         """
         documents = self.transform_data()
         vstore, _ = self.store_in_vector_db(documents)

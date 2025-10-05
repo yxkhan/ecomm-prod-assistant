@@ -2,6 +2,7 @@ import os
 import sys
 import json
 from dotenv import load_dotenv
+load_dotenv()
 from utils.config_loader import load_config
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
@@ -127,3 +128,5 @@ if __name__ == "__main__":
     print(f"LLM Loaded: {llm}")
     result = llm.invoke("Hello, how are you?")
     print(f"LLM Result: {result.content}")
+
+    #update to push the code
